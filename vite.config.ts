@@ -1,9 +1,9 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
-  // Use VITE_BASE_PATH if provided (e.g., set to '/' in Netlify environment variables), else default based on command
-  base: process.env.VITE_BASE_PATH || (command === 'build' ? '/bnk-digital/' : '/'),
+// https://vite.dev/config/
+export default defineConfig(({ command }) => ({
+  base: process.env.VITE_BASE_PATH || (command === 'build' ? '/' : '/'),
   plugins: [react()],
   server: {
     port: 5174,
@@ -12,4 +12,4 @@ export default defineConfig({
       interval: 1000,
     },
   },
-});
+}));
