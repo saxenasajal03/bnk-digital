@@ -280,7 +280,7 @@ export const Footer: React.FC = () => {
                     <div>
                       <div className="text-sm font-bold text-white">Strategy Request Received!</div>
                       <div className="text-xs text-slate-300 mt-1">
-                        Recorded as unique inquiry &amp; dispatched to <span className="text-cyan-400 font-medium">hello.bnkdigital@gmail.com</span> &amp; Google Sheet.
+                        Your inquiry has been registered with our priority strategy desk. We will connect with you in &lt; 4 hours.
                       </div>
                     </div>
 

@@ -10,14 +10,16 @@ import {
   Mail, 
   Phone, 
   ShieldCheck, 
-  Search,
-  Database,
-  ExternalLink,
-  Sparkles,
-  Sheet,
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp
+  Search, 
+  Database, 
+  Sparkles, 
+  AlertTriangle, 
+  Lock, 
+  Key, 
+  Eye, 
+  EyeOff, 
+  ShieldAlert, 
+  LogOut 
 } from 'lucide-react';
 import { 
   getStoredLeads, 
@@ -25,12 +27,15 @@ import {
   clearAllLeads, 
   exportLeadsToCSV, 
   saveLead, 
-  type Lead,
-  getGoogleSheetWebhookUrl,
-  setGoogleSheetWebhookUrl,
-  APPS_SCRIPT_SOURCE,
-  syncWithGoogleSheet
+  type Lead, 
+  syncWithGoogleSheet 
 } from '../utils/leadStorage';
+import { 
+  verifyAdminCredentials, 
+  isVaultSessionAuthenticated, 
+  clearVaultSession, 
+  setCustomAdminPassword 
+} from '../utils/crypto';
 import { playFuturisticClick, playSpiritualChime } from '../utils/sound';
 
 interface LeadVaultModalProps {
@@ -40,41 +45,75 @@ interface LeadVaultModalProps {
 }
 
 export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose, onLeadCountChange }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginUser, setLoginUser] = useState('');
+  const [loginPass, setLoginPass] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  const [showChangePass, setShowChangePass] = useState(false);
+  const [newPasswordInput, setNewPasswordInput] = useState('');
+  const [changePassSuccess, setChangePassSuccess] = useState(false);
+
   const [leads, setLeads] = useState<Lead[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [showScriptGuide, setShowScriptGuide] = useState(false);
-  const [sheetUrl, setSheetUrl] = useState('');
-  const [isCopiedScript, setIsCopiedScript] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      const data = getStoredLeads();
-      setLeads(data);
-      setSheetUrl(getGoogleSheetWebhookUrl());
-      onLeadCountChange?.(data.length);
+      const auth = isVaultSessionAuthenticated();
+      setIsAuthenticated(auth);
+      if (auth) {
+        const data = getStoredLeads();
+        setLeads(data);
+        onLeadCountChange?.(data.length);
+      }
     }
   }, [isOpen, onLeadCountChange]);
 
   if (!isOpen) return null;
 
-  const handleSaveSheetUrl = () => {
-    playFuturisticClick();
-    setGoogleSheetWebhookUrl(sheetUrl);
-    setActionFeedback('Google Sheet Webhook URL saved successfully!');
-    setTimeout(() => setActionFeedback(null), 3000);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+
+    const success = verifyAdminCredentials(loginUser, loginPass);
+    if (success) {
+      playSpiritualChime();
+      setIsAuthenticated(true);
+      const data = getStoredLeads();
+      setLeads(data);
+      setSheetUrl(getGoogleSheetWebhookUrl());
+      onLeadCountChange?.(data.length);
+    } else {
+      playFuturisticClick();
+      setLoginError('Invalid Administrator ID or Security Passkey. Access Denied.');
+    }
   };
 
-  const handleCopyScript = () => {
-    playSpiritualChime();
-    navigator.clipboard.writeText(APPS_SCRIPT_SOURCE);
-    setIsCopiedScript(true);
-    setActionFeedback('Google Apps Script copied to clipboard!');
+  const handleLogout = () => {
+    playFuturisticClick();
+    clearVaultSession();
+    setIsAuthenticated(false);
+    setLoginUser('');
+    setLoginPass('');
+    setLeads([]);
+  };
+
+  const handleChangePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPasswordInput.trim().length < 6) {
+      alert('Password must be at least 6 characters long.');
+      return;
+    }
+    setCustomAdminPassword(newPasswordInput);
+    setChangePassSuccess(true);
+    setNewPasswordInput('');
     setTimeout(() => {
-      setIsCopiedScript(false);
-      setActionFeedback(null), 3000;
-    }, 2500);
+      setChangePassSuccess(false);
+      setShowChangePass(false);
+    }, 2000);
   };
 
   const handleDelete = (id: string) => {
@@ -167,6 +206,126 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
       (l.service && l.service.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  // =========================================================================
+  // VIEW 1: AUTHENTICATION GATE (PASSWORD & CREDENTIALS PROTECTION)
+  // =========================================================================
+  if (!isAuthenticated) {
+    return (
+      <AnimatePresence>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+          <div className="absolute inset-0" onClick={onClose} />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 15 }}
+            className="relative w-full max-w-md rounded-3xl bg-[#090d1c] border-2 border-cyan-400/60 shadow-2xl shadow-cyan-500/20 p-6 sm:p-8 z-10 overflow-hidden"
+          >
+            {/* Ambient neon backglow */}
+            <div className="absolute -top-12 -right-12 w-36 h-36 bg-pink-500/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-12 -left-12 w-36 h-36 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                playFuturisticClick();
+                onClose();
+              }}
+              className="absolute top-4 right-4 p-2 rounded-xl bg-slate-800/80 text-slate-400 hover:text-white transition-all"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Shield and Lock Header */}
+            <div className="text-center space-y-3 mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border-2 border-cyan-400 flex items-center justify-center mx-auto shadow-neon-cyan text-cyan-300">
+                <Lock className="w-7 h-7" />
+              </div>
+
+              <div>
+                <h3 className="font-heading font-black text-xl text-white tracking-wide">
+                  Agency Leadership Vault
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Restricted Authentication • Encrypted Client Data
+                </p>
+              </div>
+
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/40 text-[10px] text-cyan-300">
+                <ShieldCheck className="w-3 h-3 text-cyan-400" />
+                <span>Salted Stream Cipher Protection Active</span>
+              </div>
+            </div>
+
+            {/* Credential Inputs */}
+            <form onSubmit={handleLogin} className="space-y-4">
+              {loginError && (
+                <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/40 text-red-300 text-xs flex items-center space-x-2 animate-pulse">
+                  <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{loginError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  Admin ID / Handle
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={loginUser}
+                  onChange={(e) => setLoginUser(e.target.value)}
+                  placeholder="Admin username (e.g. bnkadmin)"
+                  className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-400 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  Security Passkey
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={loginPass}
+                    onChange={(e) => setLoginPass(e.target.value)}
+                    placeholder="Enter security password"
+                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-black/60 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-400 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 rounded-xl font-heading font-bold text-xs text-white bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 hover:from-cyan-300 hover:to-purple-500 shadow-neon-cyan transition-all flex items-center justify-center space-x-2"
+              >
+                <Key className="w-4 h-4" />
+                <span>Decrypt &amp; Access CRM</span>
+              </button>
+
+              <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 text-center text-[10px] text-slate-400 space-y-0.5">
+                <div>Default Agency ID: <code className="text-cyan-400 font-mono">bnkadmin</code></div>
+                <div>Default Security Passkey: <code className="text-cyan-400 font-mono">BNK@2026</code></div>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      </AnimatePresence>
+    );
+  }
+
+  // =========================================================================
+  // VIEW 2: AUTHENTICATED DECRYPTED LEADS CRM & CONTROLS
+  // =========================================================================
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md">
@@ -187,10 +346,13 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
               <div>
                 <div className="flex items-center space-x-2">
                   <h3 className="font-heading font-black text-lg sm:text-xl text-white">
-                    Agency Leads Vault & CRM
+                    Agency Leads Vault &amp; CRM
                   </h3>
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
                     {leads.length} Unique {leads.length === 1 ? 'Lead' : 'Leads'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Decrypted
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
@@ -202,12 +364,12 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
             {/* Quick Actions */}
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => setShowScriptGuide(!showScriptGuide)}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1.5 transition-all"
+                onClick={() => setShowChangePass(!showChangePass)}
+                className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 flex items-center space-x-1.5 transition-all"
+                title="Change security passkey"
               >
-                <Sheet className="w-3.5 h-3.5" />
-                <span>Google Sheet Setup</span>
-                {showScriptGuide ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                <Key className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="hidden sm:inline">Change Key</span>
               </button>
 
               <button
@@ -217,6 +379,14 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export CSV</span>
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-xl bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition-all border border-amber-500/30"
+                title="Lock Vault &amp; Logout"
+              >
+                <LogOut className="w-4 h-4" />
               </button>
 
               <button
@@ -232,6 +402,38 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
             </div>
           </div>
 
+          {/* Change Password Dropdown */}
+          {showChangePass && (
+            <div className="p-4 bg-slate-950 border-b border-cyan-500/20">
+              <form onSubmit={handleChangePasswordSubmit} className="flex flex-wrap items-center gap-3">
+                <div className="text-xs font-bold text-white flex items-center space-x-1.5">
+                  <Key className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Set Custom Security Passkey:</span>
+                </div>
+                <input
+                  type="password"
+                  required
+                  placeholder="New passkey (min 6 chars)"
+                  value={newPasswordInput}
+                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl bg-black/60 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all"
+                >
+                  Update Passkey
+                </button>
+                {changePassSuccess && (
+                  <span className="text-xs text-emerald-400 flex items-center space-x-1">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Passkey updated successfully!</span>
+                  </span>
+                )}
+              </form>
+            </div>
+          )}
+
           {/* Action Feedback Toast */}
           {actionFeedback && (
             <div className="bg-cyan-500/20 border-b border-cyan-500/30 px-5 py-2 text-xs text-cyan-300 font-medium flex items-center justify-between">
@@ -240,67 +442,8 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
             </div>
           )}
 
-          {/* Google Sheet Setup Accordion */}
-          {showScriptGuide && (
-            <div className="p-5 bg-[#05070f] border-b border-cyan-500/20 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Sheet className="w-4 h-4 text-emerald-400" />
-                  <span className="font-heading font-bold text-white text-xs">
-                    Connect Your Real Google Sheet (30 Seconds Setup)
-                  </span>
-                </div>
-                <button
-                  onClick={handleCopyScript}
-                  className="px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border border-cyan-400/40 flex items-center space-x-1.5 transition-all"
-                >
-                  {isCopiedScript ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{isCopiedScript ? 'Copied Script!' : 'Copy Apps Script Code'}</span>
-                </button>
-              </div>
-
-              <div className="text-[11px] text-slate-400 leading-relaxed grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                  <div className="font-bold text-cyan-400">Step 1: Open Sheets</div>
-                  <div>Open <a href="https://sheets.new" target="_blank" rel="noopener noreferrer" className="text-pink-400 underline">sheets.new</a>, then click <b>Extensions &gt; Apps Script</b>.</div>
-                </div>
-                <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                  <div className="font-bold text-cyan-400">Step 2: Paste &amp; Deploy</div>
-                  <div>Paste the copied script code, click <b>Deploy &gt; New deployment</b>, select <b>Web app</b>, set Access to <b>"Anyone"</b>.</div>
-                </div>
-                <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                  <div className="font-bold text-cyan-400">Step 3: Paste URL Below</div>
-                  <div>Copy your Web app URL and paste it into the field below to sync every inquiry!</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="url"
-                  placeholder="Paste your Google Apps Script Web App URL (https://script.google.com/macros/s/.../exec)"
-                  value={sheetUrl}
-                  onChange={(e) => setSheetUrl(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-xl bg-black/60 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-                />
-                <button
-                  onClick={handleSaveSheetUrl}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shrink-0"
-                >
-                  Save URL
-                </button>
-              </div>
-
-              {sheetUrl && (
-                <div className="flex items-center space-x-2 text-[11px] text-emerald-400 bg-emerald-950/30 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-semibold">Google Sheet Intake Webhook is LIVE & Connected (Zero Duplicacy Active)</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Delivery Channels & Deduplication Shield Banner */}
-          <div className="px-5 sm:px-6 py-3 bg-gradient-to-r from-cyan-950/40 via-blue-950/30 to-purple-950/40 border-b border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          {/* Status & Security Banner */}
+          <div className="px-5 sm:px-6 py-2.5 bg-gradient-to-r from-cyan-950/40 via-blue-950/30 to-purple-950/40 border-b border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div className="flex items-center space-x-2 text-slate-300">
               <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
               <div>
@@ -311,15 +454,15 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
             <div className="flex items-center space-x-2 text-slate-300">
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
               <div>
-                <span className="font-bold text-white">Gmail Dispatch:</span>{' '}
-                <span className="text-slate-400">hello.bnkdigital@gmail.com</span>
+                <span className="font-bold text-white">Google Sheet Sync:</span>{' '}
+                <span className="text-emerald-400 font-semibold">Live &amp; Connected</span>
               </div>
             </div>
             <div className="flex items-center space-x-2 text-slate-300">
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
               <div>
-                <span className="font-bold text-white">WhatsApp Hotline:</span>{' '}
-                <span className="text-slate-400">+91 072358 36153</span>
+                <span className="font-bold text-white">Gmail Dispatch:</span>{' '}
+                <span className="text-slate-400">hello.bnkdigital@gmail.com</span>
               </div>
             </div>
           </div>
@@ -485,7 +628,7 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
           <div className="p-3 bg-black/60 border-t border-white/5 text-center text-[11px] text-slate-500 flex items-center justify-center space-x-2">
             <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
             <span>
-              All inquiries are strictly deduplicated by email address. Shortcut: <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 font-mono text-[10px]">Ctrl + Shift + L</kbd>
+              All inquiries are encrypted in storage &amp; strictly deduplicated by email. Shortcut: <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 font-mono text-[10px]">Ctrl + Shift + L</kbd>
             </span>
           </div>
         </motion.div>

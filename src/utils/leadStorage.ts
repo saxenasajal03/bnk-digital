@@ -1,3 +1,5 @@
+import { encryptPayload, decryptPayload } from './crypto';
+
 export interface Lead {
   id: string;
   name: string;
@@ -22,7 +24,9 @@ export const getStoredLeads = (): Lead[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw);
+    const decrypted = decryptPayload(raw);
+    if (!decrypted) return [];
+    return JSON.parse(decrypted);
   } catch (err) {
     console.error('Failed to load leads from localStorage', err);
     return [];
@@ -77,7 +81,8 @@ export const saveLead = (lead: Omit<Lead, 'id' | 'timestamp'>): SaveLeadResult =
 
   const updated = [newLead, ...existing];
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    const cipher = encryptPayload(JSON.stringify(updated));
+    localStorage.setItem(STORAGE_KEY, cipher);
   } catch (err) {
     console.error('Failed to save lead to localStorage', err);
     return {
@@ -96,7 +101,8 @@ export const deleteLead = (id: string): Lead[] => {
   const existing = getStoredLeads();
   const updated = existing.filter((l) => l.id !== id);
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    const cipher = encryptPayload(JSON.stringify(updated));
+    localStorage.setItem(STORAGE_KEY, cipher);
   } catch (err) {
     console.error('Failed to update leads in localStorage', err);
   }
