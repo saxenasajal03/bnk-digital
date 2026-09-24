@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ThreeCosmosCanvas } from './components/ThreeCosmosCanvas';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -13,7 +13,7 @@ import { CosmicCursor } from './components/CosmicCursor';
 import { playFuturisticClick } from './utils/sound';
 
 export function App() {
-  const [selectedServiceForForm, setSelectedServiceForForm] = useState<string>('Social Media Management');
+  const [, setSelectedServiceForForm] = useState<string>('Social Media Management');
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;

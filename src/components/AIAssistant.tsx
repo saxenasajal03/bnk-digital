@@ -1,19 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  MessageSquare, 
-  X, 
-  Send, 
-  Sparkles, 
-  Flame, 
-  Phone, 
-  CheckCircle2, 
-  Bot, 
-  User, 
-  CornerDownLeft,
-  MessageCircle
-} from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { X, Send, Bot, MessageCircle } from 'lucide-react';
 import { playFuturisticClick, playSpiritualChime } from '../utils/sound';
 
 interface Message {
