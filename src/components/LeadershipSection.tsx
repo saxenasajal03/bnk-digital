@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, Crown, Sparkles, Video, TrendingUp, ShieldCheck } from 'lucide-react';
 import { playFuturisticClick } from '../utils/sound';
+import { getAssetPath } from '../utils/assets';
 
 interface TeamMember {
   name: string;
@@ -19,7 +20,7 @@ export const LeadershipSection: React.FC = () => {
       name: 'Sparsh Sinha',
       role: 'Director & Chairman',
       department: 'Visionary Strategy & Agency Governance',
-      image: '/assets/team/sparsh_sinha.jpg',
+      image: getAssetPath('assets/team/sparsh_sinha.jpg'),
       neonBorder: 'border-pink-500 shadow-[0_0_25px_rgba(255,0,128,0.45)]',
       tag: 'Director & Chairman',
     },
@@ -27,7 +28,7 @@ export const LeadershipSection: React.FC = () => {
       name: 'Sajal Saxena',
       role: 'Chief Management Head',
       department: 'Executive Operations & High-ROAS Growth',
-      image: '/assets/team/sajal_saxena.jpg',
+      image: getAssetPath('assets/team/sajal_saxena.jpg'),
       neonBorder: 'border-cyan-400 shadow-[0_0_25px_rgba(0,242,254,0.45)]',
       tag: 'Chief Management Head',
     },
@@ -35,7 +36,7 @@ export const LeadershipSection: React.FC = () => {
       name: 'Aakash Kaushik',
       role: 'Chief Advisor',
       department: 'Strategic Counsel & Macro Narrative',
-      image: '/assets/team/aakash_kaushik.jpg',
+      image: getAssetPath('assets/team/aakash_kaushik.jpg'),
       neonBorder: 'border-amber-400 shadow-[0_0_25px_rgba(245,166,35,0.45)]',
       tag: 'Chief Advisor',
     },
@@ -43,7 +44,7 @@ export const LeadershipSection: React.FC = () => {
       name: 'Kshitiz Narayan',
       role: 'Talent Acquisition Head',
       department: 'Human Capital & Creative Talent Curation',
-      image: '/assets/team/kshitiz_narayan.jpg',
+      image: getAssetPath('assets/team/kshitiz_narayan.jpg'),
       neonBorder: 'border-cyan-400 shadow-[0_0_25px_rgba(0,242,254,0.45)]',
       tag: 'Talent Acquisition Head',
     },
@@ -55,7 +56,7 @@ export const LeadershipSection: React.FC = () => {
       name: 'Antra Thakur',
       role: 'Digital Marketing Intern',
       department: 'Growth Campaigns, Social Reach & Audience Engagement',
-      image: '/assets/team/antra_thakur.jpg',
+      image: getAssetPath('assets/team/antra_thakur.jpg'),
       neonBorder: 'border-cyan-400 shadow-[0_0_25px_rgba(0,242,254,0.45)]',
       tag: 'Digital Marketing Intern',
     },
@@ -63,7 +64,7 @@ export const LeadershipSection: React.FC = () => {
       name: 'Kavyansh Daksh',
       role: 'Video Editing Intern',
       department: 'Viral Reels, Shorts, Motion Graphics & Visual Pacing',
-      image: '/assets/team/kavyansh_daksh.jpg',
+      image: getAssetPath('assets/team/kavyansh_daksh.jpg'),
       neonBorder: 'border-pink-500 shadow-[0_0_25px_rgba(255,0,128,0.45)]',
       tag: 'Video Editing Intern',
     },
@@ -71,7 +72,7 @@ export const LeadershipSection: React.FC = () => {
       name: 'Tista Maity',
       role: 'Video Editing Intern',
       department: 'Dynamic Sound Design, Color Grading & Cinema Cuts',
-      image: '/assets/team/tista_maity.jpg',
+      image: getAssetPath('assets/team/tista_maity.jpg'),
       neonBorder: 'border-amber-400 shadow-[0_0_25px_rgba(245,166,35,0.45)]',
       tag: 'Video Editing Intern',
     },

@@ -11,6 +11,7 @@ import {
   Flame
 } from 'lucide-react';
 import { playFuturisticClick, playSpiritualChime } from '../utils/sound';
+import { getAssetPath } from '../utils/assets';
 
 interface SpiritualHeritageProps {
   onOpenBannerModal?: () => void;
@@ -78,7 +79,7 @@ export const SpiritualHeritage: React.FC<SpiritualHeritageProps> = ({ onOpenBann
         <div className="relative mb-16 rounded-2xl overflow-hidden border border-white/10 group shadow-2xl bg-slate-900/60">
           <div className="relative aspect-[21/9] sm:aspect-[24/9] w-full overflow-hidden">
             <img
-              src="/assets/bnk_banner.png"
+              src={getAssetPath('assets/bnk_banner.png')}
               alt="Baba Neeb Karori Digital Media Agency Official Banner"
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
             />

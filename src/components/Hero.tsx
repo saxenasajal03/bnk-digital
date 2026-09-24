@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, Sparkles, ChevronDown, Compass, Flame } from 'lucide-react';
 import { playFuturisticClick, playSpiritualChime } from '../utils/sound';
+import { getAssetPath } from '../utils/assets';
 
 interface HeroProps {
   onOpenConsultation?: () => void;
@@ -134,7 +135,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenConsultation, onOpenPosterModa
                 className="w-full h-full rounded-full p-2 bg-gradient-to-b from-slate-900 to-black border border-white/20 shadow-neon-trishul flex items-center justify-center relative overflow-hidden"
               >
                 <img
-                  src="/assets/bnk_emblem.png"
+                  src={getAssetPath('assets/bnk_emblem.png')}
                   alt="BNK Digital Circular 3D Emblem"
                   className="w-full h-full object-contain rounded-full trishul-glow hover:scale-105 transition-transform duration-500"
                 />
@@ -216,7 +217,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenConsultation, onOpenPosterModa
             <div className="lg:col-span-5 flex justify-center lg:justify-end">
               <div className="relative rounded-2xl overflow-hidden border border-amber-500/30 shadow-2xl max-w-sm w-full group">
                 <img
-                  src="/assets/bnk_banner.png"
+                  src={getAssetPath('assets/bnk_banner.png')}
                   alt="Baba Neeb Karori & Kainchi Dham Heritage"
                   className="w-full h-48 sm:h-56 object-cover object-right group-hover:scale-105 transition-transform duration-700"
                 />

@@ -11,6 +11,7 @@ import { AIAssistant } from './components/AIAssistant';
 import { ROICalculator } from './components/ROICalculator';
 import { CosmicCursor } from './components/CosmicCursor';
 import { playFuturisticClick } from './utils/sound';
+import { getAssetPath } from './utils/assets';
 
 export function App() {
   const [, setSelectedServiceForForm] = useState<string>('Social Media Management');
@@ -30,7 +31,7 @@ export function App() {
     playFuturisticClick();
     setModalConfig({
       isOpen: true,
-      imageSrc: './assets/services_poster.jpg',
+      imageSrc: getAssetPath('assets/services_poster.jpg'),
       title: '8 Powerful Digital Services — Official Blueprint',
       description: 'Comprehensive overview of all 8 core services delivered by BNK Digital.',
     });

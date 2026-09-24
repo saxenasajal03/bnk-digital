@@ -15,6 +15,7 @@ import {
   Cpu
 } from 'lucide-react';
 import { playFuturisticClick, playSpiritualChime } from '../utils/sound';
+import { getAssetPath } from '../utils/assets';
 
 interface FloatingTag {
   id: string;
@@ -119,7 +120,7 @@ export const AntigravityPlayground: React.FC = () => {
           <div className="relative flex flex-col items-center justify-center p-6 text-center select-none pointer-events-none">
             <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-bnk-cyan via-purple-600 to-bnk-magenta animate-pulse-glow flex items-center justify-center shadow-neon-trishul">
               <img
-                src="/assets/bnk_emblem.png"
+                src={getAssetPath('assets/bnk_emblem.png')}
                 alt="Central Gravitational Core"
                 className="w-full h-full object-contain rounded-full"
               />

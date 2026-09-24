@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Bot, MessageCircle } from 'lucide-react';
 import { playFuturisticClick, playSpiritualChime } from '../utils/sound';
+import { getAssetPath } from '../utils/assets';
 
 interface Message {
   id: string;
@@ -174,7 +175,7 @@ export const AIAssistant: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div className="w-9 h-9 rounded-full p-0.5 bg-gradient-to-tr from-cyan-400 to-pink-500 shadow-neon-cyan">
                   <img
-                    src="/assets/bnk_emblem.png"
+                    src={getAssetPath('assets/bnk_emblem.png')}
                     alt="BNK Logo"
                     className="w-full h-full object-cover rounded-full"
                   />

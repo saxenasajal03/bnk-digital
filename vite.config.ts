@@ -2,8 +2,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
-export default defineConfig({
-  base: './',
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? '/bnk-digital/' : '/',
   plugins: [react()],
   server: {
     port: 5174,
@@ -12,4 +12,4 @@ export default defineConfig({
       interval: 1000,
     },
   },
-});
+}));

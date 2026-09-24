@@ -11,6 +11,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { playFuturisticClick, playSpiritualChime, toggleAmbientSound } from '../utils/sound';
+import { getAssetPath } from '../utils/assets';
 import { Calculator } from 'lucide-react';
 
 interface NavbarProps {
@@ -63,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenConsultation, onOpenCalcul
           >
             <div className="relative w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-bnk-cyan via-purple-600 to-bnk-magenta group-hover:shadow-neon-cyan transition-all duration-300">
               <img
-                src="/assets/bnk_emblem.png"
+                src={getAssetPath('assets/bnk_emblem.png')}
                 alt="BNK Digital Logo"
                 className="w-full h-full object-cover rounded-full bg-bnk-bg"
               />
