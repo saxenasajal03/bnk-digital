@@ -79,7 +79,9 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
     setLoginError(null);
 
     const authResult = verifyAdminCredentials(loginUser, loginPass);
-    if (authResult.success) {
+    const isSuccess = authResult === true || (authResult && authResult.success);
+
+    if (isSuccess) {
       playSpiritualChime();
       setIsAuthenticated(true);
       const data = getStoredLeads();
@@ -87,7 +89,11 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
       onLeadCountChange?.(data.length);
     } else {
       playFuturisticClick();
-      setLoginError(authResult.message || 'Invalid Administrator ID or Security Passkey. Access Denied.');
+      setLoginError(
+        typeof authResult === 'object' && authResult.message
+          ? authResult.message
+          : 'Invalid Administrator ID or Security Passkey. Access Denied.'
+      );
     }
   };
 
