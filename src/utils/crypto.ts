@@ -18,12 +18,11 @@ export function sha256(ascii: string): string {
 
   const mathPow = Math.pow;
   const maxWord = mathPow(2, 32);
-  let lengthProperty = 'length';
   let i = 0, j = 0;
   let result = '';
 
   const words: number[] = [];
-  const asciiBitLength = ascii[lengthProperty] * 8;
+  const asciiBitLength = ascii.length * 8;
 
   let hash: number[] = [];
   let k: number[] = [];
@@ -41,15 +40,15 @@ export function sha256(ascii: string): string {
   }
 
   ascii += '\x80';
-  while ((ascii[lengthProperty] % 64) - 56) ascii += '\x00';
-  for (i = 0; i < ascii[lengthProperty]; i++) {
+  while ((ascii.length % 64) - 56) ascii += '\x00';
+  for (i = 0; i < ascii.length; i++) {
     j = ascii.charCodeAt(i);
     words[i >> 2] |= j << (((3 - i) % 4) * 8);
   }
-  words[words[lengthProperty]] = (asciiBitLength / maxWord) | 0;
-  words[words[lengthProperty]] = asciiBitLength;
+  words.push((asciiBitLength / maxWord) | 0);
+  words.push(asciiBitLength);
 
-  for (j = 0; j < words[lengthProperty]; ) {
+  for (j = 0; j < words.length; ) {
     const w = words.slice(j, (j += 16));
     const oldHash = hash;
     hash = hash.slice(0, 8);
