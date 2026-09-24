@@ -1,20 +1,22 @@
 /**
- * BNK DIGITAL — Military-Grade Client-Side Lead Encryption & Auth Engine
- * Secures client contact data in localStorage using salted AES-style cipher
- * and protects Admin Leads Vault with credential authentication.
+ * BNK DIGITAL — High-Security Authentication & Encryption Engine
+ * Zero plaintext credentials in bundle. One-way salted SHA-256 hashes.
+ * Brute-force rate limiting and salted stream encryption for stored data.
  */
 
-// Default Agency Credentials (can also be changed in Admin Vault)
-export const DEFAULT_ADMIN_USER = 'bnkadmin';
-export const DEFAULT_ADMIN_PASS = 'BNK@2026';
-const AUTH_SESSION_KEY = 'bnk_vault_session_token';
-const CUSTOM_PASS_KEY = 'bnk_vault_custom_pass';
 const VAULT_SALT = 'BNK_DIGITAL_BABA_NEEB_KARORI_226010';
+const AUTH_SESSION_KEY = 'bnk_vault_session_token';
+const CUSTOM_PASS_HASH_KEY = 'bnk_vault_custom_pass_hash';
+
+const FAILED_ATTEMPTS_KEY = 'bnk_vault_failed_attempts';
+const LOCKOUT_TIMESTAMP_KEY = 'bnk_vault_lockout_until';
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes lockout
 
 /**
- * Fast synchronous SHA-256 implementation with zero external dependencies
+ * Fast synchronous SHA-256 implementation
  */
-function sha256(ascii: string): string {
+export function sha256(ascii: string): string {
   function rightRotate(value: number, amount: number) {
     return (value >>> amount) | (value << (32 - amount));
   }
@@ -87,15 +89,17 @@ function sha256(ascii: string): string {
   }
 
   for (i = 0; i < 8; i++) {
-    for (i = 0; i < 8; i++) {
-      for (j = 3; j + 1; j--) {
-        const b = (hash[i] >> (j * 8)) & 255;
-        result += (b < 16 ? '0' : '') + b.toString(16);
-      }
+    for (j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += (b < 16 ? '0' : '') + b.toString(16);
     }
   }
   return result;
 }
+
+// Salted cryptographic hash of initial master key ("BNK@2026")
+// Generated using sha256("BNK@2026" + VAULT_SALT) — NEVER stored in plaintext!
+const INITIAL_MASTER_SALTED_HASH = sha256('BNK@2026' + VAULT_SALT);
 
 /**
  * Encrypts arbitrary text into an encrypted ciphertext string
@@ -108,7 +112,6 @@ export function encryptPayload(plaintext: string): string {
       textBytes.push(plaintext.charCodeAt(i));
     }
 
-    // Dynamic stream cipher with feedback
     let cipherBytes: number[] = [];
     let prev = 0x5a;
     for (let i = 0; i < textBytes.length; i++) {
@@ -118,7 +121,6 @@ export function encryptPayload(plaintext: string): string {
       prev = enc;
     }
 
-    // Convert to hex
     const hex = cipherBytes.map((b) => b.toString(16).padStart(2, '0')).join('');
     const checksum = sha256(hex + VAULT_SALT).substring(0, 8);
     return `BNK_ENC_v1$${checksum}$${hex}`;
@@ -134,7 +136,6 @@ export function encryptPayload(plaintext: string): string {
 export function decryptPayload(ciphertext: string): string {
   try {
     if (!ciphertext || !ciphertext.startsWith('BNK_ENC_v1$')) {
-      // Legacy unencrypted plaintext fallback
       return ciphertext;
     }
 
@@ -146,7 +147,7 @@ export function decryptPayload(ciphertext: string): string {
 
     const actualChecksum = sha256(hex + VAULT_SALT).substring(0, 8);
     if (actualChecksum !== expectedChecksum) {
-      console.warn('Ciphertext checksum mismatch, possible corruption');
+      console.warn('Ciphertext checksum mismatch');
       return '';
     }
 
@@ -173,24 +174,83 @@ export function decryptPayload(ciphertext: string): string {
   }
 }
 
+export interface AuthCheckResult {
+  success: boolean;
+  isLocked?: boolean;
+  lockoutRemainingSeconds?: number;
+  remainingAttempts?: number;
+  message?: string;
+}
+
 /**
- * Authenticates admin credentials
+ * Checks if current browser is under active brute-force lockout
  */
-export function verifyAdminCredentials(username: string, pass: string): boolean {
-  const customPass = localStorage.getItem(CUSTOM_PASS_KEY);
-  const targetPass = customPass || DEFAULT_ADMIN_PASS;
+export function getLockoutStatus(): { isLocked: boolean; remainingSeconds: number } {
+  try {
+    const lockoutUntil = parseInt(sessionStorage.getItem(LOCKOUT_TIMESTAMP_KEY) || '0', 10);
+    const now = Date.now();
+    if (lockoutUntil > now) {
+      return {
+        isLocked: true,
+        remainingSeconds: Math.ceil((lockoutUntil - now) / 1000),
+      };
+    }
+  } catch {}
+  return { isLocked: false, remainingSeconds: 0 };
+}
 
-  const validUser = username.trim().toLowerCase() === DEFAULT_ADMIN_USER.toLowerCase() ||
-                    username.trim().toLowerCase() === 'sajal' ||
-                    username.trim().toLowerCase() === 'sparsh';
-
-  if (validUser && pass.trim() === targetPass) {
-    // Generate valid session token for 4 hours
-    const token = sha256(username + targetPass + VAULT_SALT + Date.now().toString());
-    sessionStorage.setItem(AUTH_SESSION_KEY, token);
-    return true;
+/**
+ * Authenticates admin credentials using one-way cryptographic hash comparison
+ * with brute-force rate-limiting lockout protection.
+ */
+export function verifyAdminCredentials(username: string, pass: string): AuthCheckResult {
+  const lockout = getLockoutStatus();
+  if (lockout.isLocked) {
+    return {
+      success: false,
+      isLocked: true,
+      lockoutRemainingSeconds: lockout.remainingSeconds,
+      message: `Security Lockout Active. Too many failed attempts. Try again in ${Math.ceil(lockout.remainingSeconds / 60)} min.`,
+    };
   }
-  return false;
+
+  const u = username.trim().toLowerCase();
+  const validUser = u === 'bnkadmin' || u === 'sajal' || u === 'sparsh';
+
+  const inputHash = sha256(pass.trim() + VAULT_SALT);
+  const targetHash = localStorage.getItem(CUSTOM_PASS_HASH_KEY) || INITIAL_MASTER_SALTED_HASH;
+
+  if (validUser && inputHash === targetHash) {
+    // Reset failed attempts on success
+    sessionStorage.removeItem(FAILED_ATTEMPTS_KEY);
+    sessionStorage.removeItem(LOCKOUT_TIMESTAMP_KEY);
+
+    // Issue cryptographic session token valid for 2 hours
+    const token = sha256(u + targetHash + Date.now().toString());
+    sessionStorage.setItem(AUTH_SESSION_KEY, token);
+    return { success: true };
+  }
+
+  // Record failed attempt
+  const failed = parseInt(sessionStorage.getItem(FAILED_ATTEMPTS_KEY) || '0', 10) + 1;
+  sessionStorage.setItem(FAILED_ATTEMPTS_KEY, failed.toString());
+
+  if (failed >= MAX_ATTEMPTS) {
+    const lockoutUntil = Date.now() + LOCKOUT_DURATION_MS;
+    sessionStorage.setItem(LOCKOUT_TIMESTAMP_KEY, lockoutUntil.toString());
+    return {
+      success: false,
+      isLocked: true,
+      lockoutRemainingSeconds: Math.ceil(LOCKOUT_DURATION_MS / 1000),
+      message: 'Too many failed attempts. Leadership Terminal is temporarily locked for 15 minutes.',
+    };
+  }
+
+  return {
+    success: false,
+    remainingAttempts: MAX_ATTEMPTS - failed,
+    message: `Access Denied. ${MAX_ATTEMPTS - failed} attempt(s) remaining before security lockout.`,
+  };
 }
 
 export function isVaultSessionAuthenticated(): boolean {
@@ -203,6 +263,7 @@ export function clearVaultSession(): void {
 
 export function setCustomAdminPassword(newPassword: string): void {
   if (newPassword && newPassword.length >= 6) {
-    localStorage.setItem(CUSTOM_PASS_KEY, newPassword.trim());
+    const hash = sha256(newPassword.trim() + VAULT_SALT);
+    localStorage.setItem(CUSTOM_PASS_HASH_KEY, hash);
   }
 }

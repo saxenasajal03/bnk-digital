@@ -9,7 +9,8 @@ import {
   Database, 
   Loader2, 
   AlertTriangle, 
-  ShieldCheck 
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 import { InstagramIcon, FacebookIcon, LinkedinIcon, YoutubeIcon, XTwitterIcon } from './SocialIcons';
 import { LeadVaultModal } from './LeadVaultModal';
@@ -426,11 +427,12 @@ export const Footer: React.FC = () => {
                   playFuturisticClick();
                   setIsVaultOpen(true);
                 }}
-                className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-800/40 text-cyan-300 hover:text-white transition-all text-[11px]"
-                title="View all unique leads, Google Sheet sync, and export to CSV (Ctrl+Shift+L)"
+                className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-cyan-300 transition-all text-[11px]"
+                aria-label="Restricted Leadership Access"
+                title="Leadership Terminal (Ctrl+Shift+L)"
               >
-                <Database className="w-3 h-3 text-cyan-400" />
-                <span>Admin Leads Vault ({leadCount})</span>
+                <Lock className="w-3 h-3 text-cyan-400/80" />
+                <span>Leadership Terminal</span>
               </button>
 
               <span className="text-cyan-400 font-medium">Let's Build The Real Presence</span>

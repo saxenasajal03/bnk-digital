@@ -78,17 +78,16 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
     e.preventDefault();
     setLoginError(null);
 
-    const success = verifyAdminCredentials(loginUser, loginPass);
-    if (success) {
+    const authResult = verifyAdminCredentials(loginUser, loginPass);
+    if (authResult.success) {
       playSpiritualChime();
       setIsAuthenticated(true);
       const data = getStoredLeads();
       setLeads(data);
-      setSheetUrl(getGoogleSheetWebhookUrl());
       onLeadCountChange?.(data.length);
     } else {
       playFuturisticClick();
-      setLoginError('Invalid Administrator ID or Security Passkey. Access Denied.');
+      setLoginError(authResult.message || 'Invalid Administrator ID or Security Passkey. Access Denied.');
     }
   };
 
@@ -312,9 +311,9 @@ export const LeadVaultModal: React.FC<LeadVaultModalProps> = ({ isOpen, onClose,
                 <span>Decrypt &amp; Access CRM</span>
               </button>
 
-              <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 text-center text-[10px] text-slate-400 space-y-0.5">
-                <div>Default Agency ID: <code className="text-cyan-400 font-mono">bnkadmin</code></div>
-                <div>Default Security Passkey: <code className="text-cyan-400 font-mono">BNK@2026</code></div>
+              <div className="p-2.5 rounded-xl bg-slate-900/40 border border-white/5 text-center text-[10px] text-slate-500 flex items-center justify-center space-x-1.5">
+                <ShieldCheck className="w-3 h-3 text-cyan-400" />
+                <span>Restricted Leadership Access • Rate-Limited Authentication</span>
               </div>
             </form>
           </motion.div>
