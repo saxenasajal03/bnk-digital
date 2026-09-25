@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { ArrowRight, Sparkles, ChevronDown, Compass, Flame } from 'lucide-react';
+import { Sparkles, Flame } from 'lucide-react';
 import { playFuturisticClick, playSpiritualChime } from '../utils/sound';
 import { getAssetPath } from '../utils/assets';
+import { MobileHeroShowcase } from './MobileHeroShowcase';
 
 interface HeroProps {
   onOpenConsultation?: () => void;
@@ -142,7 +143,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenConsultation, onOpenPosterModa
               </div>
 
               {/* Ambient ground spark reflection */}
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-48 h-10 bg-gradient-to-r from-cyan-400 via-pink-500 to-cyan-400 rounded-full blur-xl opacity-70 pointer-events-none" />
+              <div className={`absolute -bottom-6 left-1/2 -translate-x-1/2 w-48 h-10 bg-gradient-to-r from-cyan-400 via-pink-500 to-cyan-400 rounded-full blur-xl pointer-events-none transition-all duration-300 ${isHovered ? 'opacity-90 scale-110' : 'opacity-70 scale-100'}`} />
             </motion.div>
           </div>
 
@@ -167,6 +168,12 @@ export const Hero: React.FC<HeroProps> = ({ onOpenConsultation, onOpenPosterModa
           </div>
 
         </div>
+
+        {/* Mobile Hero Screens Showcase - Services in Action */}
+        <MobileHeroShowcase 
+          onOpenConsultation={onOpenConsultation}
+          onOpenPosterModal={onOpenPosterModal}
+        />
 
         {/* Baba Neeb Karori Heritage Card (From the reference UI bottom of Panel 1 / top of Panel 2) */}
         <motion.div

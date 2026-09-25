@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Users, Crown, Sparkles, Video, TrendingUp, ShieldCheck } from 'lucide-react';
-import { playFuturisticClick } from '../utils/sound';
+import { Users, Crown } from 'lucide-react';
 import { getAssetPath } from '../utils/assets';
 
 interface TeamMember {
@@ -31,6 +30,14 @@ export const LeadershipSection: React.FC = () => {
       image: getAssetPath('assets/team/sajal_saxena.jpg'),
       neonBorder: 'border-cyan-400 shadow-[0_0_25px_rgba(0,242,254,0.45)]',
       tag: 'Chief Management Head',
+    },
+    {
+      name: 'Prabal Sinha',
+      role: 'Political Communications Head',
+      department: 'Political Strategy, Public Narrative & Strategic Communications',
+      image: getAssetPath('assets/team/prabal_sinha.jpg'),
+      neonBorder: 'border-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.45)]',
+      tag: 'Political Communications Head',
     },
     {
       name: 'Aakash Kaushik',
@@ -109,11 +116,15 @@ export const LeadershipSection: React.FC = () => {
           </p>
         </div>
 
-        {/* 4 Leadership Cards in a single responsive row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-24">
-          {leadership.map((leader) => (
+        {/* 5 Leadership Cards in a responsive 5-column grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-6 mb-24">
+          {leadership.map((leader, idx) => (
             <motion.div
               key={leader.name}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
               whileHover={{ y: -8 }}
               className="flex flex-col items-center text-center group cursor-pointer"
             >

@@ -206,6 +206,8 @@ export function verifyAdminCredentials(username: string, pass: string): AuthResu
     'sajal.saxena',
     'sparsh',
     'sparsh.sinha',
+    'prabal',
+    'prabal.sinha',
     'aakash',
     'kshitiz',
   ];

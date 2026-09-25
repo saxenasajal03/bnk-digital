@@ -6,7 +6,6 @@ import { ServicesGrid } from './components/ServicesGrid';
 import { LeadershipSection } from './components/LeadershipSection';
 import { Footer } from './components/Footer';
 import { ImageModal } from './components/ImageModal';
-import { AudioPlayerWidget } from './components/AudioPlayerWidget';
 import { AIAssistant } from './components/AIAssistant';
 import { ROICalculator } from './components/ROICalculator';
 import { CosmicCursor } from './components/CosmicCursor';
@@ -85,9 +84,6 @@ export function App() {
         <Footer />
 
       </div>
-
-      {/* Interactive Background Sound Controller Widget (Bottom-Left) */}
-      <AudioPlayerWidget />
 
       {/* Interactive AI Assistant Widget to Reply (Bottom-Right) */}
       <AIAssistant />

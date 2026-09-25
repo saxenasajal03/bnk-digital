@@ -240,7 +240,11 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
             return (
               <motion.div
                 key={service.number}
-                whileHover={{ y: -5 }}
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.5, delay: ((service.number - 1) % 2) * 0.15 }}
+                whileHover={{ y: -6, scale: 1.01 }}
                 onClick={() => handleCardClick(service)}
                 className={`cursor-pointer rounded-3xl p-6 sm:p-8 bg-[#090d1c]/90 border-2 ${service.borderColor} ${service.glowColor} ${service.neonClass} transition-all duration-300 flex flex-col justify-between relative overflow-hidden`}
               >

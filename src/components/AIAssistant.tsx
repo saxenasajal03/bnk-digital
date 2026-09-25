@@ -58,9 +58,9 @@ export const AIAssistant: React.FC = () => {
       };
     }
 
-    if (q.includes('team') || q.includes('leadership') || q.includes('head') || q.includes('sparsh') || q.includes('sajal') || q.includes('aakash') || q.includes('kshitiz') || q.includes('antra') || q.includes('kavyansh') || q.includes('tista')) {
+    if (q.includes('team') || q.includes('leadership') || q.includes('head') || q.includes('sparsh') || q.includes('sajal') || q.includes('prabal') || q.includes('aakash') || q.includes('kshitiz') || q.includes('antra') || q.includes('kavyansh') || q.includes('tista')) {
       return {
-        text: '👑 Leadership:\n1. Sparsh Sinha — Director & Chairman\n2. Sajal Saxena — Chief Management Head\n3. Aakash Kaushik — Chief Advisor\n4. Kshitiz Narayan — Talent Acquisition Head\n\n✨ Core Team:\n1. Antra Thakur — Digital Marketing Intern\n2. Kavyansh Daksh — Video Editing Intern\n3. Tista Maity — Video Editing Intern',
+        text: '👑 Leadership:\n1. Sparsh Sinha — Director & Chairman\n2. Sajal Saxena — Chief Management Head\n3. Prabal Sinha — Political Communications Head\n4. Aakash Kaushik — Chief Advisor\n5. Kshitiz Narayan — Talent Acquisition Head\n\n✨ Core Team:\n1. Antra Thakur — Digital Marketing Intern\n2. Kavyansh Daksh — Video Editing Intern\n3. Tista Maity — Video Editing Intern',
       };
     }
 
